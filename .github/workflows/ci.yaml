@@ -24,6 +24,11 @@ jobs:
       - name: Docker Setup Compose
         uses: docker/setup-compose-action@v1.2.0
 
+      - name: Pull Docker images as cache
+        run: |
+          docker compose pull crosstool-ng-builder
+          docker compose pull crosstool-ng-conan
+
       - name: Build Docker image
         run: |
           docker compose build --pull crosstool-ng-builder
@@ -41,11 +46,20 @@ jobs:
       - name: Push Docker images
         run: docker compose push
 
-      - name: Validate build capacity
+      - name: Validate GCC and Conan
         run: |
           docker compose run --rm crosstool-ng-conan /opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-gcc --version
           docker compose run --rm crosstool-ng-conan /opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-g++ --version
-          docker compose run --rm crosstool-ng-conan conan install -r conancenter --requires=zlib/1.3.1 -o "*/*:shared=False" --build=missing
-          docker compose run --rm crosstool-ng-conan conan install -r conancenter --requires=boost/1.88.0 -o "*/*:shared=False" --build=missing
-          docker compose run --rm crosstool-ng-conan conan install -r conancenter --requires=wayland/1.23.0 -o "*/*:shared=True" --build=missing
-          docker compose run --rm crosstool-ng-conan conan install -r conancenter --requires=protobuf/6.30.1 -o "*/*:shared=False" --build=missing
+          docker compose run --rm crosstool-ng-conan conan --version
+
+      - name: Build zlib using Conan
+        run: docker compose run --rm crosstool-ng-conan conan install -r conancenter --requires=zlib/1.3.1 -o "*/*:shared=False" --build=missing
+
+      - name: Build wayland using Conan
+        run: docker compose run --rm crosstool-ng-conan conan install -r conancenter --requires=wayland/1.23.0 -o "*/*:shared=True" --build=missing
+
+      - name: Build Boost using Conan
+        run: docker compose run --rm crosstool-ng-conan conan install -r conancenter --requires=boost/1.88.0 -o "*/*:shared=False" --build=missing
+
+      - name: Build Protobuf using Conan
+        run: docker compose run --rm crosstool-ng-conan conan install -r conancenter --requires=protobuf/6.30.1 -o "*/*:shared=False" --build=missing

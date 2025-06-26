@@ -137,8 +137,7 @@ RUN conan profile detect \
     && printf 'core.sources:download_cache=/root/.conan2/download_cache\n' >> /root/.conan2/global.conf \
     && printf '[conf]\ntools.build:verbosity=verbose\ntools.compilation:verbosity=verbose\n' >> /root/.conan2/profiles/default \
     && printf 'tools.build:compiler_executables={"c":"/opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-gcc", "cpp":"/opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-g++"}\n' >> /root/.conan2/profiles/default \
-    && printf '[buildenv]\nPATH=/opt/x-tools/x86_64-linux-gnu/bin:$PATH\n' >> /root/.conan2/profiles/default \
-    && printf 'AR=/opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-ar\n' >> /root/.conan2/profiles/default \
+    && printf '[buildenv]\nAR=/opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-ar\n' >> /root/.conan2/profiles/default \
     && printf 'LD=/opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-ld\n' >> /root/.conan2/profiles/default \
     && printf 'RANLIB=/opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-ranlib\n' >> /root/.conan2/profiles/default \
     && printf 'NM=/opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-nm\n' >> /root/.conan2/profiles/default \
