@@ -3,32 +3,33 @@ FROM registry.access.redhat.com/ubi8/ubi:8.10-1184.1741863532 AS crosstoolng
 LABEL maintainer="Conan.io <info@conan.io>"
 
 RUN yum install -y \
-    diffutils \
-    wget \
-    git \
-    xz-libs \
-    bzip2 \
-    unzip \
-    ca-certificates \
     autoconf \
     automake \
-    make \
+    bzip2 \
+    ca-certificates \
+    diffutils \
     file \
     findutils \
     gawk \
     gcc \
     gcc-c++ \
+    git \
     glibc-static \
-    libstdc++-static \
     help2man \
+    libstdc++-static \
+    libtool \
+    libtool-ltdl \
+    make \
+    ncurses-devel \
     patch \
     perl \
     python3 \
-    ncurses-devel \
-    libtool \
-    libtool-ltdl \
     sudo \
-    xz
+    time \
+    unzip \
+    wget \
+    xz \
+    xz-libs
 
 WORKDIR /root
 

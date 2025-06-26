@@ -27,5 +27,14 @@ jobs:
       - name: Build Docker image
         run: docker compose build
 
+      - name: Collect GCC dumpspecs
+        run: docker compose run --rm crosstool-ng-conan /opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-gcc -dumpspecs > gcc-dumpspecs.txt
+
+      - name: Store GCC dumpspecs
+        uses: actions/upload-artifact@v4
+        with:
+          name: gcc-dumpspecs
+          path: gcc-dumpspecs.txt
+
       - name: Push Docker images
         run: docker compose push
