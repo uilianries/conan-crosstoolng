@@ -26,8 +26,8 @@ jobs:
 
       - name: Pull Docker images as cache
         run: |
-          docker compose pull crosstool-ng-builder
-          docker compose pull crosstool-ng-conan
+          docker compose pull -q crosstool-ng-builder
+          docker compose pull -q crosstool-ng-conan
 
       - name: Build Docker image
         run: |

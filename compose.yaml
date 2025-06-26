@@ -5,6 +5,8 @@ services:
       context: .
       dockerfile: Dockerfile
       target: crosstoolng
+      cache_from:
+        - uilianries/crosstoolng-builder:latest
       args:
         CROSSTOOLNG_VERSION: 1.27.0
     image: uilianries/crosstoolng-builder:latest
@@ -17,6 +19,8 @@ services:
       context: .
       dockerfile: Dockerfile
       target: conan
+      cache_from:
+        - uilianries/crosstoolng-conan:latest
       args:
         CONAN_VERSION: 2.17.0
         CMAKE_VERSION: 3.31.8
