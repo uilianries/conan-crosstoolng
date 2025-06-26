@@ -93,18 +93,17 @@ FROM ubuntu:24.04 AS conan
 WORKDIR /root/conan
 
 RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests \
-    wget \
     ca-certificates \
-    xz-utils \
+    make \
+    perl \
     pkg-config \
+    python3 \
+    wget \
+    xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
 ARG CONAN_VERSION=2.14.0
 ARG CMAKE_VERSION=3.31.8
-
-ENV CC=/opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-gcc \
-    CXX=/opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-g++ \
-    PATH=/opt/crosstool-ng-install/bin:$PATH
 
 # INFO: Install Cmake binaries
 RUN cd /tmp/ && wget -q https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz \
@@ -125,8 +124,23 @@ RUN wget -q https://github.com/conan-io/conan/releases/download/${CONAN_VERSION}
 
 COPY --from=crosstoolng /opt/x-tools /opt/x-tools
 
+# INFO: Create symlinks for the toolchain binaries.
+# Some projectes (e.g. flex) expect gcc installed in PATH. Using CC=.../x86_64-linux-gnu-gcc does not work
+RUN update-alternatives --install /usr/local/bin/gcc gcc /opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-gcc 100 \
+    && update-alternatives --install /usr/local/bin/g++ g++ /opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-g++ 100
+
 # INFO: Detect default Conan profile and create Conan cache folder
+# Not all projects (e.g. Boost) use CC or CXX, so we need to configure them
+# The the triplet, the ar and ld executables will not be found by default (e.g. libstacktrace)
+# ranlib needed by libselinux and nm needed by wayland
 RUN conan profile detect \
     && printf 'core.sources:download_cache=/root/.conan2/download_cache\n' >> /root/.conan2/global.conf \
     && printf '[conf]\ntools.build:verbosity=verbose\ntools.compilation:verbosity=verbose\n' >> /root/.conan2/profiles/default \
+    && printf 'tools.build:compiler_executables={"c":"/opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-gcc", "cpp":"/opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-g++"}\n' >> /root/.conan2/profiles/default \
+    && printf '[buildenv]\nPATH=/opt/x-tools/x86_64-linux-gnu/bin:$PATH\n' >> /root/.conan2/profiles/default \
+    && printf 'AR=/opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-ar\n' >> /root/.conan2/profiles/default \
+    && printf 'LD=/opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-ld\n' >> /root/.conan2/profiles/default \
+    && printf 'RANLIB=/opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-ranlib\n' >> /root/.conan2/profiles/default \
+    && printf 'NM=/opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-nm\n' >> /root/.conan2/profiles/default \
+    && printf 'STRIP=/opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-strip\n' >> /root/.conan2/profiles/default \
     && conan profile show -pr default
