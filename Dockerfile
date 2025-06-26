@@ -81,23 +81,15 @@ RUN ../configure --prefix=/opt/crosstool-ng-install \
     && make install
 
 COPY crosstool.config /root/crosstool-ng-${CROSSTOOLNG_VERSION}/build/.config
-COPY patches/ /root/crosstool-ng-${CROSSTOOLNG_VERSION}/patches
+COPY patches/ /root/crosstool-ng-${CROSSTOOLNG_VERSION}/build/patches
 
 # INFO: Build the toolchain - It takes +30 minutes
+# INFO: Install the toolchain automatically in /opt/x-tools
 RUN ./ct-ng build
 
 FROM ubuntu:24.04 AS conan
 
 WORKDIR /root/conan
-
-ARG CONAN_VERSION=2.14.0
-ARG CMAKE_VERSION=3.31.8
-
-COPY --from=crosstoolng /opt/x-tools /opt/x-tools
-
-ENV CC=/opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-gcc \
-    CXX=/opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-g++ \
-    PATH=/opt/crosstool-ng-install/bin:$PATH
 
 RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests \
     wget \
@@ -105,6 +97,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends --no-install-su
     xz-utils \
     pkg-config \
     && rm -rf /var/lib/apt/lists/*
+
+ARG CONAN_VERSION=2.14.0
+ARG CMAKE_VERSION=3.31.8
+
+ENV CC=/opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-gcc \
+    CXX=/opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-g++ \
+    PATH=/opt/crosstool-ng-install/bin:$PATH
 
 # INFO: Install Cmake binaries
 RUN cd /tmp/ && wget -q https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz \
@@ -122,6 +121,8 @@ RUN wget -q https://github.com/conan-io/conan/releases/download/${CONAN_VERSION}
     && printf '/opt/conan/bin/_internal/\n' >> /etc/ld.so.conf.d/conan.conf \
     && ldconfig \
     && ln -s /opt/conan/bin/conan /usr/local/bin/conan
+
+COPY --from=crosstoolng /opt/x-tools /opt/x-tools
 
 # INFO: Detect default Conan profile and create Conan cache folder
 RUN conan profile detect \
