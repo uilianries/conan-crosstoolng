@@ -24,11 +24,6 @@ jobs:
       - name: Docker Setup Compose
         uses: docker/setup-compose-action@v1.2.0
 
-      - name: Pull Docker images as cache
-        run: |
-          docker compose pull -q crosstool-ng-builder
-          docker compose pull -q crosstool-ng-conan
-
       - name: Build Docker image
         run: |
           docker compose build crosstool-ng-builder
