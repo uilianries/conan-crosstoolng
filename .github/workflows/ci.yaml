@@ -31,8 +31,8 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker compose build --pull crosstool-ng-builder
-          docker compose build --pull crosstool-ng-conan
+          docker compose build crosstool-ng-builder
+          docker compose build crosstool-ng-conan
 
       - name: Collect GCC dumpspecs
         run: docker compose run --rm crosstool-ng-conan /opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-gcc -dumpspecs > gcc-dumpspecs.txt
