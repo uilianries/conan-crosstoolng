@@ -126,8 +126,12 @@ COPY --from=crosstoolng /opt/x-tools /opt/x-tools
 
 # INFO: Create symlinks for the toolchain binaries.
 # Some projectes (e.g. flex) expect gcc installed in PATH. Using CC=.../x86_64-linux-gnu-gcc does not work
+# readelf needed by libmysqlclient - envvar READELF does not work
+# ar needed by Qt5 -  envvar AR does not work
 RUN update-alternatives --install /usr/local/bin/gcc gcc /opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-gcc 100 \
-    && update-alternatives --install /usr/local/bin/g++ g++ /opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-g++ 100
+    && update-alternatives --install /usr/local/bin/g++ g++ /opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-g++ 100 \
+    && update-alternatives --install /usr/local/bin/readelf readelf /opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-readelf 100 \
+    && update-alternatives --install /usr/local/bin/ar ar /opt/x-tools/x86_64-linux-gnu/bin/x86_64-linux-gnu-ar 100
 
 # INFO: Detect default Conan profile and create Conan cache folder
 # Not all projects (e.g. Boost) use CC or CXX, so we need to configure them
